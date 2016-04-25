@@ -1,3 +1,2 @@
-integrantes:
-Victor Caligaris
+integrante:
 Martin Hermosilla

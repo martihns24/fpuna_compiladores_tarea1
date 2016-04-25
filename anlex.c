@@ -12,8 +12,8 @@
 
 /*********** Inclusión de cabecera **************/
 #include "anlex.h"
-
-
+#include <stdio.h>
+#include <locale.h>
 /************* Variables globales **************/
 
 int consumir;			/* 1 indica al analizador lexico que debe devolver
@@ -62,8 +62,10 @@ void sigLex()
 			numLinea++;
 			continue;
 		}
+		/*
 		else if (isalpha(c))
 		{
+			
 			//es un identificador (o palabra reservada)
 			i=0;
 			do{
@@ -90,6 +92,7 @@ void sigLex()
 			}
 			break;
 		}
+		*/
 		else if (isdigit(c))
 		{
 				//es un numero
@@ -266,6 +269,57 @@ void sigLex()
 			t.pe=buscar("}");
 			break;
 		}
+		else if (c=='t' || c=='T')
+		{
+			c=fgetc(archivo);
+			if (c=='r' || c=='R'){
+				c=fgetc(archivo);
+				if (c=='u' || c=='U'){
+					c=fgetc(archivo);
+					if (c=='e' || c=='E'){
+						t.pe=buscar("true");
+						e.compLex=BOOL;
+						strcpy(e.complex_cadena,"PR_TRUE");
+					} else{
+						ungetc(c,archivo);
+					} 
+				} else{
+					ungetc(c,archivo);
+				}
+			} else {
+				ungetc(c,archivo);
+			} 
+			
+			break;
+		}
+		else if (c=='f' || c=='F')
+		{
+			c=fgetc(archivo);
+			if (c=='a' || c=='A'){
+				c=fgetc(archivo);
+				if (c=='l' || c=='L'){
+					c=fgetc(archivo);
+					if (c=='s' || c=='S'){
+						c=fgetc(archivo);
+						if (c=='e' || c=='E'){
+							t.pe=buscar("false");
+							e.compLex=BOOL;
+							strcpy(e.complex_cadena,"PR_FALSE");
+						} else{
+							ungetc(c,archivo);
+						}
+					} else{
+						ungetc(c,archivo);
+					} 
+				} else{
+					ungetc(c,archivo);
+				}
+			} else {
+				ungetc(c,archivo);
+			} 
+			
+			break;
+		}
 		else if (c=='\"')
 		{//un caracter o una cadena de caracteres
 			i=0;
@@ -298,7 +352,7 @@ void sigLex()
 					id[i]=c;
 					i++;
 				}
-			}while(isascii(c));
+			}while(isalpha(c) || c==' ' ||(c <= 'á'  && c >= 'ú'));
 			id[i]='\0';
 			if (c!=EOF)
 				ungetc(c,archivo);
@@ -338,6 +392,9 @@ void sigLex()
 
 int main(int argc,char* args[])
 {
+	// locale
+	//setLocale(LC_ALL,"");
+	
 	// inicializar analizador lexico
 
 	initTabla();
@@ -350,7 +407,7 @@ int main(int argc,char* args[])
 			printf("Archivo no encontrado.\n");
 			exit(1);
 		}
-		salida = fopen("output.txt","w");
+		salida = fopen("salida.txt","w");
 		int lineaAux = 1;
 		while (t.compLex!=EOF){
 			sigLex();
